@@ -8,12 +8,6 @@ const cryptoState = inject<ReturnType<typeof useCrypto>>('cryptoState');
 const { cryptoService, hasKeyPair } = cryptoState || useCrypto();
 const toast = useToast();
 
-type Contact = {
-  publicKey: string;
-  name: string;
-  key?: string;
-};
-
 type SenderInfo = {
   key: string;
   name?: string;
@@ -22,8 +16,6 @@ type SenderInfo = {
 const encryptedInput = ref('');
 const senderInfo = ref<SenderInfo>({ key: '', name: undefined });
 const decryptedMessage = ref('');
-const contacts = ref<Contact[]>([]);
-const newContact = ref<Contact | null>(null);
 
 const handleDecrypt = () => {
   if (!hasKeyPair.value || !cryptoService.value) {
@@ -71,47 +63,6 @@ const handleDecrypt = () => {
     senderInfo.value = { key: '', name: undefined };
   }
 };
-
-const decryptMessage = () => {
-  if (!encryptedInput.value) {
-    console.error('Encrypted input is missing.');
-    return;
-  }
-
-  if (!senderInfo.value || !senderInfo.value.key) {
-    console.error('Sender key is missing.');
-    return;
-  }
-
-  if (!cryptoService.value) {
-    console.error('Crypto service is not initialized.');
-    return;
-  }
-
-  const result = cryptoService.value.decrypt(
-    encryptedInput.value,
-    senderInfo.value.key
-  );
-
-  if (typeof result === 'object' && result !== null) {
-    decryptedMessage.value = result.message;
-
-    const knownContact = contacts.value.find(
-      c => c.publicKey === result.senderPub
-    );
-
-    if (!knownContact) {
-      newContact.value = {
-        name: 'Unknown',
-        publicKey: result.senderPub,
-      };
-    } else {
-      senderInfo.value.name = knownContact.name;
-    }
-  }
-};
-
-decryptMessage();
 </script>
 
 <template>

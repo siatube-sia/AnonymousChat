@@ -24,11 +24,47 @@ export interface Contact {
 }
 
 const STORAGE_KEY_PREFIX = 'secure_chat_tool_';
+const PBKDF2_ITERATIONS = 310_000;
+
+type StoredKeyData = {
+  kdf: 'PBKDF2-SHA-256';
+  iterations: number;
+  salt: string;
+  nonce: string;
+  encrypted: string;
+};
+
+const deriveEncryptionKey = async (
+  password: string,
+  salt: Uint8Array,
+  iterations = PBKDF2_ITERATIONS
+): Promise<Uint8Array> => {
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+
+  const keyBits = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      hash: 'SHA-256',
+      salt,
+      iterations,
+    },
+    keyMaterial,
+    256
+  );
+
+  return new Uint8Array(keyBits);
+};
 
 export const saveKeyEncrypted = async (keyData: string, password: string): Promise<void> => {
   try {
     const salt = nacl.randomBytes(16);
-    const keyBytes = new TextEncoder().encode(password.padEnd(32, '0').slice(0, 32));
+    const keyBytes = await deriveEncryptionKey(password, salt);
     const nonce = nacl.randomBytes((nacl.secretbox as any).nonceLength);
     
     const encryptedData = (nacl.secretbox as any)(
@@ -37,7 +73,9 @@ export const saveKeyEncrypted = async (keyData: string, password: string): Promi
       new Uint8Array(keyBytes)
     );
 
-    const fullData = {
+    const fullData: StoredKeyData = {
+      kdf: 'PBKDF2-SHA-256',
+      iterations: PBKDF2_ITERATIONS,
       salt: toBase64(salt),
       nonce: toBase64(nonce),
       encrypted: toBase64(encryptedData)
@@ -56,8 +94,13 @@ export const loadKeyEncrypted = async (password: string): Promise<string | null>
       return null;
     }
 
-    const fullData = JSON.parse(storedData);
-    const keyBytes = new TextEncoder().encode(password.padEnd(32, '0').slice(0, 32));
+    const fullData = JSON.parse(storedData) as StoredKeyData;
+    if (fullData.kdf !== 'PBKDF2-SHA-256' || typeof fullData.iterations !== 'number') {
+      throw new Error("保存済みの鍵形式が古いため読み込めません。新しい鍵ペアを生成してください。");
+    }
+
+    const salt = fromBase64(fullData.salt);
+    const keyBytes = await deriveEncryptionKey(password, salt, fullData.iterations);
     const nonce = fromBase64(fullData.nonce);
     const encrypted = fromBase64(fullData.encrypted);
 

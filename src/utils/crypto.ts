@@ -1,13 +1,25 @@
 import nacl from 'tweetnacl';
 
 export interface EncryptedPacket {
-  alg: 'X25519+XChaCha20-Poly1305+Ed25519';
+  alg: 'X25519+XSalsa20-Poly1305+Ed25519';
   epk: string;
   nonce: string;
   ct: string;
   sig: string;
   senderPub: string;
 }
+
+type PublicKeyBundle = {
+  v: 2;
+  boxPub: string;
+  signPub: string;
+};
+
+type PrivateKeyBundle = {
+  v: 2;
+  boxSecret: string;
+  signSecret: string;
+};
 
 const toBase64 = (buf: Uint8Array): string => {
   let binary = '';
@@ -26,6 +38,46 @@ const fromBase64 = (str: string): Uint8Array => {
   return bytes;
 };
 
+const decodeBase64Json = <T>(value: string): T | null => {
+  try {
+    return JSON.parse(new TextDecoder().decode(fromBase64(value))) as T;
+  } catch {
+    return null;
+  }
+};
+
+const encodeBase64Json = (value: unknown): string => (
+  toBase64(new TextEncoder().encode(JSON.stringify(value)))
+);
+
+const parsePublicKey = (publicKeyBase64: string): {
+  boxPublicKey: Uint8Array;
+  signingPublicKey: Uint8Array;
+  normalizedPublicKey: string;
+} => {
+  const bundle = decodeBase64Json<PublicKeyBundle>(publicKeyBase64);
+
+  if (bundle?.v !== 2 || !bundle.boxPub || !bundle.signPub) {
+    throw new Error("Invalid public key format");
+  }
+
+  return {
+    boxPublicKey: fromBase64(bundle.boxPub),
+    signingPublicKey: fromBase64(bundle.signPub),
+    normalizedPublicKey: publicKeyBase64,
+  };
+};
+
+const signingPayload = (packet: Omit<EncryptedPacket, 'sig'>): Uint8Array => (
+  new TextEncoder().encode(JSON.stringify({
+    alg: packet.alg,
+    epk: packet.epk,
+    nonce: packet.nonce,
+    ct: packet.ct,
+    senderPub: packet.senderPub,
+  }))
+);
+
 type DecryptResult = {
   message: string;
   senderPub: string;
@@ -33,32 +85,53 @@ type DecryptResult = {
 
 export class CryptoService {
   private keyPair: any;
+  private signingKeyPair: any;
+  private publicKeyBase64: string;
 
   constructor(privateKeyBase64?: string) {
     if (privateKeyBase64) {
       try {
-        const privateKey = fromBase64(privateKeyBase64);
-        this.keyPair = (nacl.box.keyPair as any).fromSecretKey(privateKey);
+        const privateBundle = decodeBase64Json<PrivateKeyBundle>(privateKeyBase64);
+
+        if (privateBundle?.v !== 2 || !privateBundle.boxSecret || !privateBundle.signSecret) {
+          throw new Error("Invalid private key format");
+        }
+
+        const boxSecretKey = fromBase64(privateBundle.boxSecret);
+        const signingSecretKey = fromBase64(privateBundle.signSecret);
+        this.keyPair = (nacl.box.keyPair as any).fromSecretKey(boxSecretKey);
+        this.signingKeyPair = (nacl.sign.keyPair as any).fromSecretKey(signingSecretKey);
       } catch (e) {
         console.error("Invalid private key provided:", e);
         throw new Error("提供された秘密鍵が無効です。");
       }
     } else {
       this.keyPair = (nacl.box.keyPair as any)();
+      this.signingKeyPair = (nacl.sign.keyPair as any)();
     }
+
+    this.publicKeyBase64 = encodeBase64Json({
+      v: 2,
+      boxPub: toBase64(this.keyPair.publicKey),
+      signPub: toBase64(this.signingKeyPair.publicKey),
+    } satisfies PublicKeyBundle);
   }
 
   getPublicKey(): string {
-    return toBase64(this.keyPair.publicKey);
+    return this.publicKeyBase64;
   }
 
   getPrivateKey(): string {
-    return toBase64(this.keyPair.secretKey);
+    return encodeBase64Json({
+      v: 2,
+      boxSecret: toBase64(this.keyPair.secretKey),
+      signSecret: toBase64(this.signingKeyPair.secretKey),
+    } satisfies PrivateKeyBundle);
   }
 
   encrypt(message: string, receiverPublicKeyBase64: string): string {
     try {
-      const receiverPublicKey = fromBase64(receiverPublicKeyBase64);
+      const { boxPublicKey: receiverPublicKey } = parsePublicKey(receiverPublicKeyBase64);
       const messageBuffer = new TextEncoder().encode(message);
       const nonce = nacl.randomBytes((nacl.box as any).nonceLength);
       
@@ -73,13 +146,20 @@ export class CryptoService {
         throw new Error("Encryption failed");
       }
 
-      const packet: EncryptedPacket = {
-        alg: 'X25519+XChaCha20-Poly1305+Ed25519',
+      const unsignedPacket: Omit<EncryptedPacket, 'sig'> = {
+        alg: 'X25519+XSalsa20-Poly1305+Ed25519',
         epk: toBase64(this.keyPair.publicKey),
         nonce: toBase64(nonce),
         ct: toBase64(ciphertext),
-        sig: '',
         senderPub: this.getPublicKey()
+      };
+
+      const packet: EncryptedPacket = {
+        ...unsignedPacket,
+        sig: toBase64((nacl.sign.detached as any)(
+          signingPayload(unsignedPacket),
+          this.signingKeyPair.secretKey
+        )),
       };
 
       return toBase64(
@@ -100,7 +180,38 @@ export class CryptoService {
       const packetStr = new TextDecoder().decode(encryptedData);
       const packet = JSON.parse(packetStr) as EncryptedPacket;
 
-      const senderPublicKey = fromBase64(senderPublicKeyBase64);
+      if (packet.alg !== 'X25519+XSalsa20-Poly1305+Ed25519') {
+        throw new Error("Unsupported algorithm");
+      }
+
+      const expectedSender = parsePublicKey(senderPublicKeyBase64);
+      const packetSender = parsePublicKey(packet.senderPub);
+
+      if (packet.senderPub !== expectedSender.normalizedPublicKey) {
+        throw new Error("Sender key mismatch");
+      }
+
+      if (!packet.sig) {
+        throw new Error("Signature is missing");
+      }
+
+      const isValidSignature = (nacl.sign.detached.verify as any)(
+        signingPayload({
+          alg: packet.alg,
+          epk: packet.epk,
+          nonce: packet.nonce,
+          ct: packet.ct,
+          senderPub: packet.senderPub,
+        }),
+        fromBase64(packet.sig),
+        expectedSender.signingPublicKey
+      );
+
+      if (!isValidSignature) {
+        throw new Error("Signature verification failed");
+      }
+
+      const senderPublicKey = packetSender.boxPublicKey;
       const nonce = fromBase64(packet.nonce);
       const ciphertext = fromBase64(packet.ct);
 
@@ -119,7 +230,7 @@ export class CryptoService {
 
       return {
         message: decryptedMessage,
-        senderPub: senderPublicKeyBase64,
+        senderPub: expectedSender.normalizedPublicKey,
       };
     } catch (e) {
       console.error("Decryption error:", e);

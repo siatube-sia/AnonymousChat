@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { type Contact, getAllContacts, saveContact } from '../utils/storage';
+import { type Contact, getAllContacts, saveContact, deleteContact } from '../utils/storage';
 import { useToast } from 'vue-toastification';
 
 const emit = defineEmits<{
@@ -37,11 +37,9 @@ const addContact = () => {
   toast.success("連絡先を保存しました。");
 };
 
-const removeContact = (index: number) => {
-  const contact = contacts.value[index];
-  if (contact) {
-    contacts.value.splice(index, 1);
-  }
+const removeContact = (publicKey: string) => {
+  contacts.value = contacts.value.filter(contact => contact.publicKey !== publicKey);
+  deleteContact(publicKey);
 };
 
 const selectContact = (key: string) => {
@@ -69,14 +67,14 @@ const selectContact = (key: string) => {
     <hr v-if="contacts.length > 0" />
 
     <ul class="contact-list">
-      <li v-for="(contact, index) in contacts" :key="index">
+      <li v-for="contact in contacts" :key="contact.publicKey">
         <div class="contact-info">
           <strong>{{ contact.name }}</strong>
           <span class="key-preview">{{ contact.publicKey.substring(0, 12) }}...</span>
         </div>
         <div class="actions">
           <button @click="selectContact(contact.publicKey)" class="btn-primary btn-sm">選択</button>
-          <button @click="removeContact(index)" class="btn-danger btn-sm">削除</button>
+          <button @click="removeContact(contact.publicKey)" class="btn-danger btn-sm">削除</button>
         </div>
       </li>
     </ul>

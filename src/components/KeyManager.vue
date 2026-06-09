@@ -68,7 +68,7 @@ const copyToClipboard = async (text: string) => {
 
 <template>
   <section>
-    <h2>🔐 あなたの秘密鍵の管理</h2>
+    <h2>あなたの秘密鍵の管理</h2>
 
     <div v-if="isLoading">
       <p>鍵ペアの状態を読み込み中...</p>
@@ -120,9 +120,11 @@ const copyToClipboard = async (text: string) => {
 .password-input-area {
   margin-top: 15px;
   padding: 15px;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 5px;
+  background: linear-gradient(145deg, var(--surface-soft), var(--surface-muted));
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 6px 18px rgba(31, 45, 75, 0.04);
 }
 
 @media (max-width: 768px) {
@@ -165,7 +167,7 @@ const copyToClipboard = async (text: string) => {
 
 .text-sm {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: rgba(16, 32, 51, 0.62);
   margin-top: -10px;
   margin-bottom: 15px;
 }

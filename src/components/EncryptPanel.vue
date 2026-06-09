@@ -49,7 +49,7 @@ const copyResult = () => {
 
 <template>
   <section>
-    <h2>📤 メッセージ送信</h2>
+    <h2>メッセージ送信</h2>
     
     <div class="field">
       <label>相手の公開鍵</label>
@@ -94,7 +94,7 @@ const copyResult = () => {
   max-height: 150px;
   overflow-y: auto;
   padding: 12px;
-  border-radius: 4px;
+  border-radius: 18px;
   word-break: break-all;
   white-space: pre-wrap;
   line-height: 1.4;
@@ -110,16 +110,16 @@ const copyResult = () => {
 }
 
 .result-box:hover {
-  background-color: #d4edda !important;
+  filter: brightness(1.01);
 }
 
 .result-box:active {
-  background-color: #c3e6cb !important;
+  transform: none;
 }
 
 .hint {
   font-size: 0.8rem;
-  color: #666;
+  color: rgba(16, 32, 51, 0.58);
   text-align: right;
   margin-top: 4px;
 }

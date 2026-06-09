@@ -20,7 +20,7 @@ const onSelectContact = (key: string) => {
 <template>
   <div class="app-container">
     <header>
-      <h1>🔐 Secure Copy-Paste Chat</h1>
+      <h1>Secure Copy-Paste Chat</h1>
       <p class="subtitle">
         前方秘匿性(PFS)と署名検証を備えた、最強のコピペ暗号化ツール<br>
         <small>Powered by Vue 3 & Libsodium (X25519 + XChaCha20-Poly1305 + Ed25519)</small>
@@ -47,7 +47,7 @@ const onSelectContact = (key: string) => {
     </main>
 
     <footer>
-      <p>⚠️ 注意: 秘密鍵のパスワードを忘れると復旧できません。セキュリティのため、通信ログはこのツールに保存されません。</p>
+      <p>注意: 秘密鍵のパスワードを忘れると復旧できません。セキュリティのため、通信ログはこのツールに保存されません。</p>
     </footer>
   </div>
 </template>
@@ -56,50 +56,58 @@ const onSelectContact = (key: string) => {
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
 }
 
 @media (min-width: 769px) {
   .app-container {
-    padding: 20px;
+    padding: 28px;
   }
 }
 
 header {
   text-align: center;
-  margin-bottom: 30px;
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-  color: white;
-  padding: 24px 16px;
-  border-radius: 0;
-  margin-bottom: 0;
+  color: var(--color-text-dark);
+  padding: 38px 18px 30px;
+  border-radius: 24px;
+  margin-bottom: 16px;
+  background:
+    linear-gradient(135deg, rgba(246, 251, 251, 0.7), rgba(246, 251, 251, 0.48)),
+    radial-gradient(circle at 18% 18%, rgba(59, 224, 211, 0.12), transparent 34%),
+    radial-gradient(circle at 88% 22%, rgba(255, 118, 163, 0.08), transparent 32%);
+  box-shadow:
+    0 12px 34px rgba(30, 43, 73, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+  backdrop-filter: blur(14px) saturate(112%);
 }
 
 @media (min-width: 769px) {
   header {
-    border-radius: 12px 12px 0 0;
-    margin-bottom: 0;
+    border-radius: 28px;
   }
 }
 
 header h1 {
-  color: white;
+  color: #102033;
   margin: 0 0 12px 0;
-  font-size: 28px;
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: 0;
 }
 
 @media (max-width: 768px) {
   header h1 {
-    font-size: 22px;
+    font-size: 27px;
     margin: 0 0 8px 0;
   }
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(16, 32, 51, 0.72);
   margin: 0;
   font-size: 14px;
   line-height: 1.5;
@@ -122,6 +130,7 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .full-width {
@@ -138,7 +147,7 @@ main {
 @media (min-width: 769px) {
   .grid-layout {
     grid-template-columns: 2fr 1fr;
-    gap: 20px;
+    gap: 18px;
   }
 }
 
@@ -150,7 +159,7 @@ main {
 
 @media (min-width: 769px) {
   .main-column {
-    gap: 20px;
+    gap: 18px;
   }
 }
 
@@ -168,11 +177,12 @@ footer {
   margin-top: auto;
   text-align: center;
   font-size: 0.8rem;
-  color: #999;
-  border-top: 1px solid #eee;
-  padding: 20px 16px;
-  background-color: #f9f9f9;
-  border-radius: 0 0 12px 12px;
+  color: rgba(16, 32, 51, 0.58);
+  padding: 18px 16px;
+  background: rgba(246, 251, 251, 0.42);
+  border-radius: 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(12px) saturate(110%);
   margin-left: 0;
   margin-right: 0;
   margin-bottom: 0;

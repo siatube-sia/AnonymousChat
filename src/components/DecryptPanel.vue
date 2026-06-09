@@ -67,25 +67,25 @@ const handleDecrypt = () => {
 
 <template>
   <section>
-    <h2>📥 メッセージ受信</h2>
+    <h2>メッセージ受信</h2>
 
     <div class="field">
       <label>受信した暗号化データ</label>
       <textarea v-model="encryptedInput" placeholder="SNSからコピーした暗号文をここに貼り付け"></textarea>
-      <p class="field-hint">💡 暗号化データに送信者の公開鍵が含まれている場合、自動的に抽出されます。</p>
+      <p class="field-hint">暗号化データに送信者の公開鍵が含まれている場合、自動的に抽出されます。</p>
     </div>
 
     <div class="field">
       <label>送信者の公開鍵（オプション）</label>
       <textarea v-model="senderInfo.key" placeholder="送信者の公開鍵をここに入力（自動抽出できない場合）"></textarea>
-      <p class="field-hint">💡 暗号化データから送信者の公開鍵が抽出できない場合は、ここに手動で入力してください。</p>
+      <p class="field-hint">暗号化データから送信者の公開鍵が抽出できない場合は、ここに手動で入力してください。</p>
     </div>
 
     <button @click="handleDecrypt" class="btn-secondary">復号・検証する</button>
 
     <div v-if="decryptedMessage" class="result-area">
       <div class="verification-badge">
-        ✅ 署名検証済み: {{ senderInfo?.name ? senderInfo.name : '不明な送信者' }}
+        署名検証済み: {{ senderInfo?.name ? senderInfo.name : '不明な送信者' }}
       </div>
       
       <div class="sender-key-detail">
@@ -106,31 +106,30 @@ const handleDecrypt = () => {
 
 .field-hint {
   font-size: 0.85rem;
-  color: #666;
+  color: rgba(16, 32, 51, 0.56);
   margin-top: 4px;
-  font-style: italic;
 }
 
 .result-area {
   margin-top: 25px;
-  border: 1px solid #2ecc71;
-  border-radius: 8px;
+  border-radius: 20px;
   overflow: hidden;
   animation: fadeIn 0.5s;
+  background: linear-gradient(145deg, rgba(235, 250, 246, 0.72), var(--surface-soft));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 8px 22px rgba(22, 184, 143, 0.06);
 }
 
 @media (max-width: 768px) {
   .result-area {
     margin-top: 16px;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
+    border-radius: 18px;
   }
 }
 
 .verification-badge {
-  background-color: #2ecc71;
+  background: linear-gradient(135deg, #16b88f, #35d4c2);
   color: white;
   padding: 8px 15px;
   font-weight: bold;
@@ -145,12 +144,11 @@ const handleDecrypt = () => {
 }
 
 .sender-key-detail {
-  background-color: #e8f8f5;
+  background: rgba(246, 251, 251, 0.42);
   padding: 5px 15px;
   font-size: 0.75rem;
-  color: #666;
+  color: rgba(16, 32, 51, 0.58);
   font-family: monospace;
-  border-bottom: 1px solid #ddd;
   word-break: break-all;
   line-height: 1.3;
 }
@@ -164,10 +162,10 @@ const handleDecrypt = () => {
 
 .message-content {
   padding: 20px;
-  background-color: white;
+  background: rgba(246, 251, 251, 0.54);
   font-size: 1.1rem;
   white-space: pre-wrap;
-  color: #333;
+  color: #102033;
   word-break: break-word;
   line-height: 1.5;
 }

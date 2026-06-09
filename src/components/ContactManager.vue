@@ -50,7 +50,7 @@ const selectContact = (key: string) => {
 
 <template>
   <section>
-    <h2>📖 連絡先リスト</h2>
+    <h2>連絡先リスト</h2>
     
     <div class="add-contact-form">
       <div class="field">
@@ -85,9 +85,13 @@ const selectContact = (key: string) => {
 <style scoped>
 .add-contact-form {
   margin-bottom: 20px;
-  background: #f9f9f9;
+  background:
+    linear-gradient(145deg, var(--surface-soft), var(--surface-muted));
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 6px 18px rgba(31, 45, 75, 0.04);
 }
 
 @media (max-width: 768px) {
@@ -107,8 +111,11 @@ const selectContact = (key: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--surface-muted);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+  margin-bottom: 8px;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -119,10 +126,6 @@ const selectContact = (key: string) => {
     align-items: stretch;
     padding: 12px;
   }
-}
-
-.contact-list li:last-child {
-  border-bottom: none;
 }
 
 .contact-info {
@@ -145,7 +148,7 @@ const selectContact = (key: string) => {
 
 .key-preview {
   font-family: monospace;
-  color: #888;
+  color: rgba(16, 32, 51, 0.55);
   font-size: 0.85rem;
   word-break: break-all;
 }
@@ -187,7 +190,7 @@ const selectContact = (key: string) => {
 
 .empty-msg {
   text-align: center;
-  color: #999;
+  color: rgba(16, 32, 51, 0.52);
   padding: 20px 12px;
 }
 </style>

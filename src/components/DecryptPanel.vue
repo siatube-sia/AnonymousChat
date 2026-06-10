@@ -116,9 +116,6 @@ const handleDecrypt = () => {
   overflow: hidden;
   animation: fadeIn 0.5s;
   background: linear-gradient(145deg, rgba(235, 250, 246, 0.72), var(--surface-soft));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    0 8px 22px rgba(22, 184, 143, 0.06);
 }
 
 @media (max-width: 768px) {

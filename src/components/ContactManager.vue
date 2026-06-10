@@ -89,9 +89,6 @@ const selectContact = (key: string) => {
     linear-gradient(145deg, var(--surface-soft), var(--surface-muted));
   padding: 15px;
   border-radius: 18px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    0 6px 18px rgba(31, 45, 75, 0.04);
 }
 
 @media (max-width: 768px) {
@@ -114,7 +111,6 @@ const selectContact = (key: string) => {
   padding: 12px;
   border-radius: 16px;
   background: var(--surface-muted);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
   margin-bottom: 8px;
   gap: 8px;
   flex-wrap: wrap;

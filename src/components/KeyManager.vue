@@ -122,9 +122,6 @@ const copyToClipboard = async (text: string) => {
   padding: 15px;
   background: linear-gradient(145deg, var(--surface-soft), var(--surface-muted));
   border-radius: 18px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    0 6px 18px rgba(31, 45, 75, 0.04);
 }
 
 @media (max-width: 768px) {

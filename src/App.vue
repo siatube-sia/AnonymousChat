@@ -79,9 +79,6 @@ header {
     linear-gradient(135deg, rgba(246, 251, 251, 0.7), rgba(246, 251, 251, 0.48)),
     radial-gradient(circle at 18% 18%, rgba(59, 224, 211, 0.12), transparent 34%),
     radial-gradient(circle at 88% 22%, rgba(255, 118, 163, 0.08), transparent 32%);
-  box-shadow:
-    0 12px 34px rgba(30, 43, 73, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.44);
   backdrop-filter: blur(14px) saturate(112%);
 }
 
@@ -181,7 +178,6 @@ footer {
   padding: 18px 16px;
   background: rgba(246, 251, 251, 0.42);
   border-radius: 20px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(12px) saturate(110%);
   margin-left: 0;
   margin-right: 0;
